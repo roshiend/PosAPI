@@ -4,10 +4,16 @@ class Api::V1::SubCategoriesController < ApplicationController
   # GET /sub_catogories or /sub_catogories.json
   def index
     @sub_catogories = SubCatogory.all
+    render json: @sub_catogories,status: :ok
   end
 
   # GET /sub_catogories/1 or /sub_catogories/1.json
   def show
+    if @sub_catogory
+      render json: @sub_catogory, status: :ok
+    else
+      render json: { error: "sub category not found" }, status: :not_found
+    end
   end
 
   # GET /sub_catogories/new
@@ -23,37 +29,35 @@ class Api::V1::SubCategoriesController < ApplicationController
   def create
     @sub_catogory = SubCatogory.new(sub_catogory_params)
 
-    respond_to do |format|
-      if @sub_catogory.save
-       
-        format.json { render :show, status: :created, location: @sub_catogory }
-      else
-        
-        format.json { render json: @sub_catogory.errors, status: :unprocessable_entity }
-      end
+    if @sub_catogory.save
+      render json: @sub_catogory, status: :created
+    else
+      render json: { errors: @sub_catogory.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /sub_catogories/1 or /sub_catogories/1.json
   def update
-    respond_to do |format|
+    if @sub_catogory
       if @sub_catogory.update(sub_catogory_params)
-        
-        format.json { render :show, status: :ok, location: @sub_catogory }
+        render json: @sub_catogory, status: :ok
       else
-        
-        format.json { render json: @sub_catogory.errors, status: :unprocessable_entity }
+        render json: { errors: @sub_catogory.errors.full_messages }, status: :unprocessable_entity
       end
+    else
+      render json: { error: "sub category not found" }, status: :not_found
     end
   end
 
   # DELETE /sub_catogories/1 or /sub_catogories/1.json
   def destroy
-    @sub_catogory.destroy
+    
 
-    respond_to do |format|
-      
-      format.json { head :no_content }
+    if @sub_catogory
+      @sub_catogory.destroy
+      render json: { message: "sub category deleted successfully" }, status: :ok
+    else
+      render json: { error: "sub category not found" }, status: :not_found
     end
   end
 

@@ -4,10 +4,16 @@ class Api::V1::VariantsController < ApplicationController
   # GET /variants or /variants.json
   def index
     @variants = Variant.all
+    render json: @variants, status: :ok
   end
 
   # GET /variants/1 or /variants/1.json
   def show
+    if @variant
+      render json: @variant, status: :ok
+    else
+      render json: { error: "variant not found" }, status: :not_found
+    end
   end
 
   # GET /variants/new
@@ -23,14 +29,10 @@ class Api::V1::VariantsController < ApplicationController
   def create
     @variant = Variant.new(variant_params)
 
-    respond_to do |format|
-      if @variant.save
-       
-        format.json { render :show, status: :created, location: @variant }
-      else
-        
-        format.json { render json: @variant.errors, status: :unprocessable_entity }
-      end
+    if @variant.save
+      render json: @variant, status: :created
+    else
+      render json: { errors: @variant.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -38,24 +40,24 @@ class Api::V1::VariantsController < ApplicationController
 
   # PATCH/PUT /variants/1 or /variants/1.json
   def update
-    respond_to do |format|
-      if @variant.update(variant_params)
-        
-        format.json { render :show, status: :ok, location: @variant }
+    if  @variant
+      if user.update(variant_params)
+        render json:  @variant, status: :ok
       else
-        
-        format.json { render json: @variant.errors, status: :unprocessable_entity }
+        render json: { errors:  @variant.errors.full_messages }, status: :unprocessable_entity
       end
+    else
+      render json: { error: "variant not found" }, status: :not_found
     end
   end
 
   # DELETE /variants/1 or /variants/1.json
   def destroy
-    @variant.destroy
-
-    respond_to do |format|
-      
-      format.json { head :no_content }
+    if  @variant
+      @variant.destroy
+      render json: { message: "variant deleted successfully" }, status: :ok
+    else
+      render json: { error: "variant not found" }, status: :not_found
     end
   end
 

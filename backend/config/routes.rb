@@ -1,94 +1,30 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
-      get "sub_categories/index"
-      get "sub_categories/_form"
-      get "sub_categories/new"
-      get "sub_categories/create"
-      get "sub_categories/edit"
-      get "sub_categories/update"
-      get "sub_categories/destroy"
-      get "sub_categories/show"
-      get "variants/index"
-      get "variants/_form"
-      get "variants/new"
-      get "variants/create"
-      get "variants/edit"
-      get "variants/update"
-      get "variants/destroy"
-      get "variants/show"
-      get "option_types/index"
-      get "option_types/_form"
-      get "option_types/new"
-      get "option_types/create"
-      get "option_types/edit"
-      get "option_types/update"
-      get "option_types/destroy"
-      get "option_types/show"
-      get "option_value_sets/index"
-      get "option_value_sets/_form"
-      get "option_value_sets/new"
-      get "option_value_sets/create"
-      get "option_value_sets/edit"
-      get "option_value_sets/update"
-      get "option_value_sets/destroy"
-      get "option_value_sets/show"
-      get "option_type_sets/index"
-      get "option_type_sets/_form"
-      get "option_type_sets/new"
-      get "option_type_sets/create"
-      get "option_type_sets/edit"
-      get "option_type_sets/update"
-      get "option_type_sets/destroy"
-      get "option_type_sets/show"
-      get "products/index"
-      get "products/_form"
-      get "products/new"
-      get "products/create"
-      get "products/edit"
-      get "products/update"
-      get "products/destroy"
-      get "products/show"
-      get "vendors/index"
-      get "vendors/_form"
-      get "vendors/new"
-      get "vendors/create"
-      get "vendors/edit"
-      get "vendors/update"
-      get "vendors/destroy"
-      get "vendors/show"
-      get "categories/index"
-      get "categories/_form"
-      get "categories/new"
-      get "categories/create"
-      get "categories/edit"
-      get "categories/update"
-      get "categories/destroy"
-      get "categories/show"
-      get "product_types/index"
-      get "product_types/_form"
-      get "product_types/new"
-      get "product_types/create"
-      get "product_types/edit"
-      get "product_types/update"
-      get "product_types/destroy"
-      get "product_types/show"
-      get "shop_locations/index"
-      get "shop_locations/_form"
-      get "shop_locations/new"
-      get "shop_locations/create"
-      get "shop_locations/edit"
-      get "shop_locations/update"
-      get "shop_locations/destroy"
-      get "shop_locations/show"
-      get "listing_types/index"
-      get "listing_types/_form"
-      get "listing_types/new"
-      get "listing_types/create"
-      get "listing_types/edit"
-      get "listing_types/update"
-      get "listing_types/destroy"
-      get "listing_types/show"
+      resources :listing_types
+      resources :shop_locations
+      resources :sub_catogories
+      
+      resources :product_types
+      resources :vendors
+      
+      resources :variants
+      resources :option_value_sets
+      resources :option_type_sets
+      resources :products do
+        resources :option_types 
+      end 
+    
+      resources :variants 
+      resources :vendors, only: [] do
+        member do
+          get :code
+        end
+      end
+      resources :categories do
+        get :sub_categories, on: :member
+      end
+      root "products#new"
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

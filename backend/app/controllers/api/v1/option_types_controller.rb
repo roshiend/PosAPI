@@ -4,10 +4,16 @@ class Api::V1::OptionTypesController < ApplicationController
   # GET /option_types or /option_types.json
   def index
     @option_types = OptionType.all
+    render json:@option_types
   end
 
   # GET /option_types/1 or /option_types/1.json
   def show
+    if  @option_type
+      render json:  @option_type, status: :ok
+    else
+      render json: { error: " option type not found" }, status: :not_found
+    end
   end
 
   # GET /option_types/new
@@ -24,37 +30,34 @@ class Api::V1::OptionTypesController < ApplicationController
   def create
     @option_type = OptionType.new(option_type_params)
 
-    respond_to do |format|
-      if @option_type.save
-        
-        format.json { render :show, status: :created, location: @option_type }
-      else
-       
-        format.json { render json: @option_type.errors, status: :unprocessable_entity }
-      end
+    if @option_type.save
+      render json: @option_type, status: :created
+    else
+      render json: { errors: @option_type.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /option_types/1 or /option_types/1.json
   def update
-    respond_to do |format|
-      if @option_type.update(option_type_params)
-       
-        format.json { render :show, status: :ok, location: @option_type }
+    if @option_type
+      if @option_type.update(user_params)
+        render json: @option_type, status: :ok
       else
-        
-        format.json { render json: @option_type.errors, status: :unprocessable_entity }
+        render json: { errors: @option_type.errors.full_messages }, status: :unprocessable_entity
       end
+    else
+      render json: { error: "option type not found" }, status: :not_found
     end
   end
 
   # DELETE /option_types/1 or /option_types/1.json
   def destroy
-    @option_type.destroy
-
-    respond_to do |format|
-     
-      format.json { head :no_content }
+    
+    if @option_type
+      @option_type.destroy
+      render json: { message: "option type deleted successfully" }, status: :ok
+    else
+      render json: { error: "option type not found" }, status: :not_found
     end
   end
 

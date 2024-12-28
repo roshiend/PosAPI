@@ -4,10 +4,16 @@ class Api::V1::OptionValueSetsController < ApplicationController
   # GET /option_value_sets or /option_value_sets.json
   def index
     @option_value_sets = OptionValueSet.all
+    render json: @option_type_sets, status: :ok
   end
 
   # GET /option_value_sets/1 or /option_value_sets/1.json
   def show
+    if @option_value_set
+      render json: @option_value_set, status: :ok
+    else
+      render json: { error: "option value set not found" }, status: :not_found
+    end
   end
 
   # GET /option_value_sets/new
@@ -23,37 +29,35 @@ class Api::V1::OptionValueSetsController < ApplicationController
   def create
     @option_value_set = OptionValueSet.new(option_value_set_params)
 
-    respond_to do |format|
-      if @option_value_set.save
-       
-        format.json { render :show, status: :created, location: @option_value_set }
-      else
-        
-        format.json { render json: @option_value_set.errors, status: :unprocessable_entity }
-      end
+    if @option_value_set.save
+      render json: @option_value_set, status: :created
+    else
+      render json: { errors: @option_value_set.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /option_value_sets/1 or /option_value_sets/1.json
   def update
-    respond_to do |format|
+    if @option_value_set
       if @option_value_set.update(option_value_set_params)
-       
-        format.json { render :show, status: :ok, location: @option_value_set }
+        render json: @option_value_set, status: :ok
       else
-        
-        format.json { render json: @option_value_set.errors, status: :unprocessable_entity }
+        render json: { errors: @option_value_set.errors.full_messages }, status: :unprocessable_entity
       end
+    else
+      render json: { error: " option value set not found" }, status: :not_found
     end
   end
 
   # DELETE /option_value_sets/1 or /option_value_sets/1.json
   def destroy
-    @option_value_set.destroy
+    
 
-    respond_to do |format|
-      
-      format.json { head :no_content }
+    if @option_value_set
+      @option_value_set.destroy
+      render json: { message: "option value set deleted successfully" }, status: :ok
+    else
+      render json: { error: "option value set not found" }, status: :not_found
     end
   end
 
@@ -65,6 +69,6 @@ class Api::V1::OptionValueSetsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def option_value_set_params
-      params.fetch(:option_value_set, {})
+      params.require(:option_value_set).permit(:value,:option_type_set_id)
     end
 end

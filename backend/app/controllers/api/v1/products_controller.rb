@@ -14,12 +14,11 @@ class Api::V1::ProductsController < ApplicationController
 
   # GET /products/1 or /products/1.json
   def show
-    # @products = Product.includes(:option_types, :variants).all
-  
-    # render json: @products.as_json(include: { 
-    #   option_types: { }, 
-    #   variants: {}
-    # })
+    
+    render json: @product.as_json(include: { 
+      option_types: { }, 
+      variants: {}
+    })
   end
 
   # GET /products/new
@@ -38,15 +37,14 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def create
-    logger.debug "Product params: #{product_params.inspect}"
+    #logger.debug "Product params: #{product_params.inspect}"
 
     @product = Product.new(product_params)
     process_option_values
     if @product.save
-      format.json { render :show, status: :ok, location: @product }
+      render json: @product, status: :created
     else
-      logger.debug "Product errors: #{@product.errors.full_messages}"
-      format.json { render json: @product.errors, status: :unprocessable_entity }
+      render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity
     end
   end
   
@@ -54,18 +52,16 @@ class Api::V1::ProductsController < ApplicationController
   
     # PATCH/PUT /products/1 or /products/1.json
     def update
-      logger.debug "Product params before update: #{product_params.inspect}"
+      #logger.debug "Product params before update: #{product_params.inspect}"
       
-      respond_to do |format|
+      if @product
         if @product.update(product_params)
-          process_option_values
-          
-          format.json { render :show, status: :ok, location: @product }
+          render json: @product, status: :ok
         else
-          logger.debug "Product errors: #{@product.errors.full_messages}"
-         
-          format.json { render json: @product.errors, status: :unprocessable_entity }
+          render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity
         end
+      else
+        render json: { error: "product not found" }, status: :not_found
       end
     end
     
@@ -77,11 +73,12 @@ class Api::V1::ProductsController < ApplicationController
 
   # DELETE /products/1 or /products/1.json
   def destroy
-    @product.destroy
-    
-    respond_to do |format|
-      
-      format.json { head :no_content }
+       
+    if @product
+      @product.destroy
+      render json: { message: "product deleted successfully" }, status: :ok
+    else
+      render json: { error: "product not found" }, status: :not_found
     end
   end
 

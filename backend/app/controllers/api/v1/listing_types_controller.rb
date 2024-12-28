@@ -4,10 +4,12 @@ class Api::V1::ListingTypesController < ApplicationController
   # GET /listing_types or /listing_types.json
   def index
     @listing_types = ListingType.all
+    render json: @listing_types,status: :ok
   end
 
   # GET /listing_types/1 or /listing_types/1.json
   def show
+    render json: @listing_type,status: :ok
   end
 
   # GET /listing_types/new
@@ -26,10 +28,10 @@ class Api::V1::ListingTypesController < ApplicationController
     respond_to do |format|
       if @listing_type.save
         
-        format.json { render :show, status: :created, location: @listing_type }
+        render json:@listing_type , status: :created
       else
-        
-        format.json { render json: @listing_type.errors, status: :unprocessable_entity }
+        render json: { errors: @listing_type.errors.full_messages }, status: :unprocessable_entity 
+       
       end
     end
   end
@@ -38,20 +40,22 @@ class Api::V1::ListingTypesController < ApplicationController
   def update
     respond_to do |format|
       if @listing_type.update(listing_type_params)
-        format.json { render :show, status: :ok, location: @listing_type }
+        render json:@listing_type , status: :created
       else
-        format.json { render json: @listing_type.errors, status: :unprocessable_entity }
+        render json: { errors: @listing_type.errors.full_messages }, status: :unprocessable_entity 
       end
     end
   end
 
   # DELETE /listing_types/1 or /listing_types/1.json
   def destroy
-    @listing_type.destroy
+    
 
-    respond_to do |format|
-     
-      format.json { head :no_content }
+    if  @listing_type
+      @listing_type.destroy
+      render json: { message: " listing type deleted successfully" }, status: :ok
+    else
+      render json: { errors: @listing_type.errors.full_messages }, status: :unprocessable_entity 
     end
   end
 

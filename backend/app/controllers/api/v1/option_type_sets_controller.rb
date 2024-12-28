@@ -4,10 +4,16 @@ class Api::V1::OptionTypeSetsController < ApplicationController
   # GET /option_type_sets or /option_type_sets.json
   def index
     @option_type_sets = OptionTypeSet.all
+    render json: @option_type_sets,status :ok
   end
 
   # GET /option_type_sets/1 or /option_type_sets/1.json
   def show
+    if @option_type_set
+      render json: @option_type_set, status: :ok
+    else
+      render json: { error: "option type set not found" }, status: :not_found
+    end
   end
 
   # GET /option_type_sets/new
@@ -22,38 +28,34 @@ class Api::V1::OptionTypeSetsController < ApplicationController
   # POST /option_type_sets or /option_type_sets.json
   def create
     @option_type_set = OptionTypeSet.new(option_type_set_params)
-
-    respond_to do |format|
-      if @option_type_set.save
-       
-        format.json { render :show, status: :created, location: @option_type_set }
-      else
-        
-        format.json { render json: @option_type_set.errors, status: :unprocessable_entity }
-      end
+    if @option_type_set.save
+      render json: @option_type_set, status: :created
+    else
+      render json: { errors: @option_type_set.errors.full_messages }, status: :unprocessable_entity
     end
+   
   end
 
   # PATCH/PUT /option_type_sets/1 or /option_type_sets/1.json
   def update
-    respond_to do |format|
-      if @option_type_set.update(option_type_set_params)
-        
-        format.json { render :show, status: :ok, location: @option_type_set }
-      else
-        
-        format.json { render json: @option_type_set.errors, status: :unprocessable_entity }
-      end
+    if @option_type_set.update(option_type_set_params)
+      render json: @option_type_set, status: :ok
+    else
+      render json: { errors: @option_type_set.errors.full_messages }, status: :unprocessable_entity
     end
+  else
+    render js
   end
 
   # DELETE /option_type_sets/1 or /option_type_sets/1.json
   def destroy
-    @option_type_set.destroy
+    
 
-    respond_to do |format|
-      
-      format.json { head :no_content }
+    if @option_type_set
+      @option_type_set.destroy
+      render json: { message: "option type_set deleted successfully" }, status: :ok
+    else
+      render json: { errors: @option_type_set.errors.full_messages }, status: :unprocessable_entity
     end
   end
 

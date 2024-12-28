@@ -4,10 +4,16 @@ class Api::V1::ProductTypesController < ApplicationController
   # GET /product_types or /product_types.json
   def index
     @product_types = ProductType.all
+    render json: @product_types,status :ok
   end
 
   # GET /product_types/1 or /product_types/1.json
   def show
+    if @product_types
+      render json: @product_types, status: :ok
+    else
+      render json: { error: "Product type not found" }, status: :not_found
+    end
   end
 
   # GET /product_types/new
@@ -23,37 +29,35 @@ class Api::V1::ProductTypesController < ApplicationController
   def create
     @product_type = ProductType.new(product_type_params)
 
-    respond_to do |format|
-      if @product_type.save
-       
-        format.json { render :show, status: :created, location: @product_type }
-      else
-        
-        format.json { render json: @product_type.errors, status: :unprocessable_entity }
-      end
+    if @product_type.save
+      render json: @product_type, status: :created
+    else
+      render json: { errors: @product_type.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /product_types/1 or /product_types/1.json
   def update
-    respond_to do |format|
+    if @product_type
       if @product_type.update(product_type_params)
-       
-        format.json { render :show, status: :ok, location: @product_type }
+        render json: @product_type, status: :ok
       else
-        
-        format.json { render json: @product_type.errors, status: :unprocessable_entity }
+        render json: { errors: @product_type.errors.full_messages }, status: :unprocessable_entity
       end
+    else
+      render json: { error: "product type not found" }, status: :not_found
     end
   end
 
   # DELETE /product_types/1 or /product_types/1.json
   def destroy
-    @product_type.destroy
+    
 
-    respond_to do |format|
-      
-      format.json { head :no_content }
+    if @product_type
+      @product_type.destroy
+      render json: { message: "product type deleted successfully" }, status: :ok
+    else
+      render json: { error: "product type not found" }, status: :not_found
     end
   end
 

@@ -4,10 +4,16 @@ class Api::V1::ShopLocationsController < ApplicationController
   # GET /shop_locations or /shop_locations.json
   def index
     @shop_locations = ShopLocation.all
+    render json: @shop_locations, status: :ok
   end
 
   # GET /shop_locations/1 or /shop_locations/1.json
   def show
+    if @shop_location
+      render json: @shop_location, status: :ok
+    else
+      render json: { error: "shop location not found" }, status: :not_found
+    end
   end
 
   # GET /shop_locations/new
@@ -23,37 +29,35 @@ class Api::V1::ShopLocationsController < ApplicationController
   def create
     @shop_location = ShopLocation.new(shop_location_params)
 
-    respond_to do |format|
-      if @shop_location.save
-       
-        format.json { render :show, status: :created, location: @shop_location }
-      else
-        
-        format.json { render json: @shop_location.errors, status: :unprocessable_entity }
-      end
+    if  @shop_location.save
+      render json:  @shop_location, status: :created
+    else
+      render json: { errors:  @shop_location.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /shop_locations/1 or /shop_locations/1.json
   def update
-    respond_to do |format|
+    if @shop_location
       if @shop_location.update(shop_location_params)
-        
-        format.json { render :show, status: :ok, location: @shop_location }
+        render json: @shop_location, status: :ok
       else
-        
-        format.json { render json: @shop_location.errors, status: :unprocessable_entity }
+        render json: { errors: @shop_location.errors.full_messages }, status: :unprocessable_entity
       end
+    else
+      render json: { error: "shop location not found" }, status: :not_found
     end
   end
 
   # DELETE /shop_locations/1 or /shop_locations/1.json
   def destroy
-    @shop_location.destroy
+   
 
-    respond_to do |format|
-      
-      format.json { head :no_content }
+    if @shop_location
+      @shop_location.destroy
+      render json: { message: "shop location deleted successfully" }, status: :ok
+    else
+      render json: { error: "shop location not found" }, status: :not_found
     end
   end
 

@@ -4,10 +4,12 @@ class Api::V1::CategoriesController < ApplicationController
   # GET /categories or /categories.json
   def index
     @categories = Category.all
+    render json: @categories,status: :ok
   end
 
   # GET /categories/1 or /categories/1.json
   def show
+    render json: @category, status: :ok
   end
 
   # GET /categories/new
@@ -18,6 +20,7 @@ class Api::V1::CategoriesController < ApplicationController
   # GET /categories/1/edit
   def edit
   end
+
   def sub_categories
     category = Category.find(params[:id])
     sub_categories = category.sub_categories
@@ -31,9 +34,9 @@ class Api::V1::CategoriesController < ApplicationController
 
     respond_to do |format|
       if @category.save
-        format.json { render :show, status: :created, location: @category }
+       render json: @category,status: :created
       else
-        format.json { render json: @category.errors, status: :unprocessable_entity }
+        render json: { errors: @category.errors.full_messages }, status: :unprocessable_entity
       end
     end
   end
@@ -42,20 +45,21 @@ class Api::V1::CategoriesController < ApplicationController
   def update
     respond_to do |format|
       if @category.update(category_params)
-        format.html { redirect_to category_url(@category), notice: "Category was successfully updated." }
-        format.json { render :show, status: :ok, location: @category }
+        render json: @category,status: :created
       else
-        format.json { render json: @category.errors, status: :unprocessable_entity }
+        render json: { errors: @category.errors.full_messages }, status: :unprocessable_entity
       end
     end
   end
 
   # DELETE /categories/1 or /categories/1.json
   def destroy
-    @category.destroy
-
-    respond_to do |format|
-      format.json { head :no_content }
+   
+    if @category
+      @category.destroy
+      render json: { message: "category deleted successfully" }, status: :ok
+    else
+      render json: { errors: @category.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -69,5 +73,5 @@ class Api::V1::CategoriesController < ApplicationController
     def category_params
       params.require(:category).permit(:value)
     end
-end
+
 end

@@ -4,10 +4,16 @@ class Api::V1::VendorsController < ApplicationController
   # GET /vendors or /vendors.json
   def index
     @vendors = Vendor.all
+    render json: @vendors, status: :ok
   end
 
   # GET /vendors/1 or /vendors/1.json
   def show
+    if @vendor
+      render json: @vendor, status: :ok
+    else
+      render json: { error: "vendor not found" }, status: :not_found
+    end
   end
 
   # GET /vendors/new
@@ -28,37 +34,33 @@ class Api::V1::VendorsController < ApplicationController
   def create
     @vendor = Vendor.new(vendor_params)
 
-    respond_to do |format|
-      if @vendor.save
-        
-        format.json { render :show, status: :created, location: @vendor }
-      else
-        
-        format.json { render json: @vendor.errors, status: :unprocessable_entity }
-      end
+    if @vendor.save
+      render json: @vendor, status: :created
+    else
+      render json: { errors: @vendor.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /vendors/1 or /vendors/1.json
   def update
-    respond_to do |format|
+    if @vendor
       if @vendor.update(vendor_params)
-       
-        format.json { render :show, status: :ok, location: @vendor }
+        render json: @vendor, status: :ok
       else
-       
-        format.json { render json: @vendor.errors, status: :unprocessable_entity }
+        render json: { errors: @vendor.errors.full_messages }, status: :unprocessable_entity
       end
+    else
+      render json: { error: "vendor not found" }, status: :not_found
     end
   end
 
   # DELETE /vendors/1 or /vendors/1.json
   def destroy
-    @vendor.destroy
-
-    respond_to do |format|
-      
-      format.json { head :no_content }
+    if @vendor
+      @vendor.destroy
+      render json: { message: "vendor deleted successfully" }, status: :ok
+    else
+      render json: { error: "vendor not found" }, status: :not_found
     end
   end
 
