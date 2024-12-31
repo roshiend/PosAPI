@@ -1,13 +1,32 @@
 import React from 'react';
-import { Option, Variant } from '../../types/variants';
+import { Trash2 } from 'lucide-react';
+import { ProductOption, ProductVariant } from '../../types/product';
 
 interface VariantsTableProps {
-  variants: Variant[];
-  options: Option[];
-  onUpdateVariant: (variantId: string, updates: Partial<Variant>) => void;
+  variants: ProductVariant[];
+  options: ProductOption[];
+  onUpdateVariant: (variantId: string, updates: Partial<ProductVariant>) => void;
+  onDeleteVariant: (variant: ProductVariant) => void;
 }
 
-export default function VariantsTable({ variants, options, onUpdateVariant }: VariantsTableProps) {
+export default function VariantsTable({ 
+  variants, 
+  options, 
+  onUpdateVariant,
+  onDeleteVariant 
+}: VariantsTableProps) {
+  const hasOptionValues = options.some(option => option.values.length > 0);
+
+  if (!hasOptionValues) {
+    return null;
+  }
+
+  const getVariantTitle = (variant: ProductVariant): string => {
+    return [variant.option1, variant.option2, variant.option3]
+      .filter(Boolean)
+      .join(' / ');
+  };
+
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="px-4 py-5 border-b border-gray-200 sm:px-6 flex justify-between items-center">
@@ -30,37 +49,53 @@ export default function VariantsTable({ variants, options, onUpdateVariant }: Va
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 SKU
               </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {variants.map((variant) => (
               <tr key={variant.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {variant.options.join(' / ')}
+                  {getVariantTitle(variant)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <input
                     type="number"
-                    className="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    step="0.01"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                     value={variant.price}
                     onChange={(e) => onUpdateVariant(variant.id, { price: e.target.value })}
+                    placeholder="0.00"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <input
                     type="number"
-                    className="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                     value={variant.quantity}
                     onChange={(e) => onUpdateVariant(variant.id, { quantity: e.target.value })}
+                    placeholder="0"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <input
                     type="text"
-                    className="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                     value={variant.sku}
                     onChange={(e) => onUpdateVariant(variant.id, { sku: e.target.value })}
+                    placeholder="SKU"
                   />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <button
+                    onClick={() => onDeleteVariant(variant)}
+                    className="text-red-600 hover:text-red-800"
+                    title="Delete variant"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </td>
               </tr>
             ))}

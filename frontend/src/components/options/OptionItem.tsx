@@ -6,9 +6,15 @@ interface OptionItemProps {
   option: Option;
   onUpdate: (option: Option) => void;
   onRemove: (optionId: string) => void;
+  onRemoveValue: (value: string) => void;
 }
 
-export default function OptionItem({ option, onUpdate, onRemove }: OptionItemProps) {
+export default function OptionItem({ 
+  option, 
+  onUpdate, 
+  onRemove,
+  onRemoveValue 
+}: OptionItemProps) {
   const [isEditing, setIsEditing] = useState(!option.name);
   const [editName, setEditName] = useState(option.name);
 
@@ -26,13 +32,6 @@ export default function OptionItem({ option, onUpdate, onRemove }: OptionItemPro
         values: [...option.values, value]
       });
     }
-  };
-
-  const removeValue = (valueToRemove: string) => {
-    onUpdate({
-      ...option,
-      values: option.values.filter(v => v !== valueToRemove)
-    });
   };
 
   return (
@@ -79,7 +78,7 @@ export default function OptionItem({ option, onUpdate, onRemove }: OptionItemPro
           >
             {value}
             <button
-              onClick={() => removeValue(value)}
+              onClick={() => onRemoveValue(value)}
               className="ml-2 text-gray-400 hover:text-gray-600"
             >
               <X size={14} />

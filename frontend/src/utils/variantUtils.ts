@@ -1,5 +1,6 @@
-// Utility functions for variant management
-export function generateVariantCombinations(options: Option[]): string[][] {
+import { ProductOption, ProductVariant } from '../types/product';
+
+export function generateVariantCombinations(options: ProductOption[]): string[][] {
   if (!options.length) return [];
   
   const generateHelper = (index = 0, current: string[] = []): string[][] => {
@@ -26,35 +27,26 @@ export function generateVariantCombinations(options: Option[]): string[][] {
 
 export function findExistingVariant(
   combination: string[], 
-  variants: Variant[], 
-  options: Option[]
-): Variant | undefined {
-  // First try exact match
-  const exactMatch = variants.find(variant => 
-    variant.options.length === combination.length &&
-    variant.options.every((opt, i) => opt === combination[i])
-  );
-
-  if (exactMatch) return exactMatch;
-
-  // Try to match based on option names and values
+  variants: ProductVariant[]
+): ProductVariant | undefined {
   return variants.find(variant => {
     return combination.every((value, index) => {
-      const optionName = options[index]?.name;
-      const variantValue = variant.options[index];
-      return value === variantValue && optionName;
+      const optionKey = `option${index + 1}` as keyof Pick<ProductVariant, 'option1' | 'option2' | 'option3'>;
+      return variant[optionKey] === value;
     });
   });
 }
 
 export function createVariant(
   combination: string[], 
-  existingVariant?: Variant,
-  defaultValues: Partial<Variant> = {}
-): Variant {
+  existingVariant?: ProductVariant,
+  defaultValues: Partial<ProductVariant> = {}
+): ProductVariant {
   return {
     id: existingVariant?.id || crypto.randomUUID(),
-    options: combination,
+    option1: combination[0] || null,
+    option2: combination[1] || null,
+    option3: combination[2] || null,
     price: existingVariant?.price || defaultValues.price || '',
     quantity: existingVariant?.quantity || defaultValues.quantity || '0',
     sku: existingVariant?.sku || defaultValues.sku || ''
