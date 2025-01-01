@@ -1,23 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Save } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import ProductDetails from './ProductDetails';
+import ProductDropdowns from './ProductDropdowns';
 import OptionsList from '../options/OptionsList';
 import VariantsTable from '../variants/VariantsTable';
-import { Product, ProductOption, ProductVariant } from '../../types/product';
+import { Product, ProductVariant } from '../../types/product';
 import { generateVariantCombinations, createVariant, findExistingVariant } from '../../utils/variantUtils';
 import { useProductSubmission } from '../../hooks/useProductSubmission';
+import { useDropdownData } from '../../hooks/useDropdownData';
 
 export default function ProductManager() {
   const [product, setProduct] = useState<Product>({
     title: '',
     description: '',
-    options: []
+    options: [],
+    vendor_id: '',
+    product_type_id: '',
+    shop_location_id: '',
+    category_id: '',
+    subcategory_id: '',
+    listing_type_id: ''
   });
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [lastUpdatedVariant, setLastUpdatedVariant] = useState<ProductVariant | null>(null);
   
   const { handleSubmit, isSubmitting } = useProductSubmission();
+  const { 
+    vendors, 
+    productTypes, 
+    shopLocations, 
+    categories, 
+    subcategories, 
+    listingTypes, 
+    isLoading 
+  } = useDropdownData(product.category_id);
 
   useEffect(() => {
     updateVariants();
@@ -50,11 +67,11 @@ export default function ProductManager() {
 
   const addOption = () => {
     if (product.options.length >= 3) {
-      alert('Maximum 3 options allowed');
+      toast.error('Maximum 3 options allowed');
       return;
     }
 
-    const newOption: ProductOption = {
+    const newOption = {
       id: crypto.randomUUID(),
       name: '',
       values: [],
@@ -79,9 +96,7 @@ export default function ProductManager() {
   const removeOption = (optionId: string) => {
     setProduct(prev => ({
       ...prev,
-      options: prev.options
-        .filter(opt => opt.id !== optionId)
-        .map((opt, index) => ({ ...opt, position: index + 1 }))
+      options: prev.options.filter(opt => opt.id !== optionId)
     }));
   };
 
@@ -114,35 +129,17 @@ export default function ProductManager() {
     });
   };
 
-  const handleDeleteVariant = (variant: ProductVariant) => {
-    // Remove the corresponding option values
-    const optionValues = [variant.option1, variant.option2, variant.option3].filter(Boolean);
-    
-    setProduct(prev => ({
-      ...prev,
-      options: prev.options.map((opt, index) => {
-        const optionValue = optionValues[index];
-        if (optionValue) {
-          return {
-            ...opt,
-            values: opt.values.filter(v => v !== optionValue)
-          };
-        }
-        return opt;
-      })
-    }));
+  const deleteVariant = (variant: ProductVariant) => {
+    setVariants(prevVariants => prevVariants.filter(v => v.id !== variant.id));
   };
 
-  const onSubmit = async () => {
-    const productData = {
-      ...product,
-      variants
-    };
-    
-    const success = await handleSubmit(productData);
-    if (success) {
-      // Reset form or redirect as needed
-    }
+  const handleDropdownChange = (field: string, value: string) => {
+    setProduct(prev => ({
+      ...prev,
+      [field]: value,
+      // Reset subcategory when category changes
+      ...(field === 'category_id' ? { subcategory_id: '' } : {})
+    }));
   };
 
   return (
@@ -155,6 +152,28 @@ export default function ProductManager() {
         onTitleChange={handleTitleChange}
         onDescriptionChange={handleDescriptionChange}
       />
+
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Product Details</h3>
+        <ProductDropdowns
+          vendors={vendors}
+          productTypes={productTypes}
+          shopLocations={shopLocations}
+          categories={categories}
+          subcategories={subcategories}
+          listingTypes={listingTypes}
+          selectedValues={{
+            vendor_id: product.vendor_id,
+            product_type_id: product.product_type_id,
+            shop_location_id: product.shop_location_id,
+            category_id: product.category_id,
+            subcategory_id: product.subcategory_id,
+            listing_type_id: product.listing_type_id
+          }}
+          onValueChange={handleDropdownChange}
+          isLoading={isLoading}
+        />
+      </div>
 
       <div className="bg-white rounded-lg shadow">
         <div className="px-4 py-5 border-b border-gray-200">
@@ -183,16 +202,15 @@ export default function ProductManager() {
         variants={variants}
         options={product.options}
         onUpdateVariant={updateVariant}
-        onDeleteVariant={handleDeleteVariant}
+        onDeleteVariant={deleteVariant}
       />
 
       <div className="flex justify-end">
         <button
-          onClick={onSubmit}
+          onClick={() => handleSubmit(product)}
           disabled={isSubmitting}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Save size={16} className="mr-2" />
           {isSubmitting ? 'Saving...' : 'Save Product'}
         </button>
       </div>

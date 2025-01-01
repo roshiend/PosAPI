@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { SelectOption } from '../../types/product';
 
 interface ProductDropdownsProps {
@@ -17,6 +17,7 @@ interface ProductDropdownsProps {
     listing_type_id: string;
   };
   onValueChange: (field: string, value: string) => void;
+  isLoading: boolean;
 }
 
 export default function ProductDropdowns({
@@ -28,20 +29,20 @@ export default function ProductDropdowns({
   listingTypes,
   selectedValues,
   onValueChange,
+  isLoading
 }: ProductDropdownsProps) {
-  // Filter subcategories based on selected category
-  const filteredSubcategories = useMemo(() => {
-    if (!selectedValues.category_id) return [];
-    return subcategories.filter(
-      sub => sub.category_id === selectedValues.category_id
-    );
-  }, [subcategories, selectedValues.category_id]);
-
-  // Reset subcategory when category changes
   const handleCategoryChange = (categoryId: string) => {
     onValueChange('category_id', categoryId);
-    onValueChange('subcategory_id', '');
+    onValueChange('subcategory_id', ''); // Reset subcategory when category changes
   };
+
+  if (isLoading) {
+    return <div className="animate-pulse space-y-4">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="h-10 bg-gray-200 rounded"></div>
+      ))}
+    </div>;
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -54,6 +55,7 @@ export default function ProductDropdowns({
           value={selectedValues.vendor_id}
           onChange={(e) => onValueChange('vendor_id', e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          required
         >
           <option value="">Select Vendor</option>
           {vendors.map((vendor) => (
@@ -73,6 +75,7 @@ export default function ProductDropdowns({
           value={selectedValues.product_type_id}
           onChange={(e) => onValueChange('product_type_id', e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          required
         >
           <option value="">Select Product Type</option>
           {productTypes.map((type) => (
@@ -92,6 +95,7 @@ export default function ProductDropdowns({
           value={selectedValues.shop_location_id}
           onChange={(e) => onValueChange('shop_location_id', e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          required
         >
           <option value="">Select Shop Location</option>
           {shopLocations.map((location) => (
@@ -111,11 +115,12 @@ export default function ProductDropdowns({
           value={selectedValues.category_id}
           onChange={(e) => handleCategoryChange(e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          required
         >
           <option value="">Select Category</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
-              {category.name}
+              {category.value}
             </option>
           ))}
         </select>
@@ -131,11 +136,12 @@ export default function ProductDropdowns({
           onChange={(e) => onValueChange('subcategory_id', e.target.value)}
           disabled={!selectedValues.category_id}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          required
         >
           <option value="">Select Subcategory</option>
-          {filteredSubcategories.map((subcategory) => (
+          {subcategories.map((subcategory) => (
             <option key={subcategory.id} value={subcategory.id}>
-              {subcategory.name}
+              {subcategory.value}
             </option>
           ))}
         </select>
@@ -150,6 +156,7 @@ export default function ProductDropdowns({
           value={selectedValues.listing_type_id}
           onChange={(e) => onValueChange('listing_type_id', e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          required
         >
           <option value="">Select Listing Type</option>
           {listingTypes.map((type) => (

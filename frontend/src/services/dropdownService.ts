@@ -21,13 +21,13 @@ export async function fetchCategories(): Promise<SelectOption[]> {
   return response.data;
 }
 
-export async function fetchListingTypes(): Promise<SelectOption[]> {
-  const response = await api.get('/listing_types');
+export async function fetchSubcategories(categoryId: string): Promise<SelectOption[]> {
+  if (!categoryId) return [];
+  const response = await api.get(`/categories/${categoryId}/sub_categories`);
   return response.data;
 }
 
-export async function fetchSubcategoriesForCategory(categoryId: string): Promise<SelectOption[]> {
-  if (!categoryId) return [];
-  const response = await api.get(`/categories/${categoryId}/sub_categories`);
-  return Array.isArray(response.data) ? response.data : [];
+export async function fetchListingTypes(): Promise<SelectOption[]> {
+  const response = await api.get('/listing_types');
+  return response.data;
 }

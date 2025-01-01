@@ -1,3 +1,10 @@
+export interface SelectOption {
+  id: string;
+  name: string;
+  value :string;
+  category_id?: string;
+}
+
 export interface ProductOption {
   id: string;
   name: string;
@@ -9,6 +16,12 @@ export interface Product {
   title: string;
   description: string;
   options: ProductOption[];
+  vendor_id: string;
+  product_type_id: string;
+  shop_location_id: string;
+  category_id: string;
+  subcategory_id: string;
+  listing_type_id: string;
 }
 
 export interface ProductVariant {
