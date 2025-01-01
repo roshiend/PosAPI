@@ -40,7 +40,7 @@ class Api::V1::ProductsController < ApplicationController
     #logger.debug "Product params: #{product_params.inspect}"
 
     @product = Product.new(product_params)
-    process_option_values
+    #process_option_values
     if @product.save
       render json: @product, status: :created
     else
@@ -93,7 +93,7 @@ class Api::V1::ProductsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def product_params
-      params.require(:product).permit(:name,:description,:master_price,:product_type_id, :category_id, :sub_category_id, :shop_location_id, :listing_type_id, :vendor_id,variants_attributes: [:id,:option1, :option2, :option3, :sku, :price,:unique_id,:barcode,:position,:title,:_destroy],option_types_attributes:[:id,:name,:_destroy,:position,:value])
+      params.require(:product).permit(:title,:description,:master_price,:product_type_id, :category_id, :sub_category_id, :shop_location_id, :listing_type_id, :vendor_id,variants_attributes: [:id,:option1, :option2, :option3, :sku, :price,:unique_id,:barcode,:position,:quantity,:title,:_destroy],option_types_attributes:[:id,:name,:_destroy,:position,{ values: [] }])
     end
 
     # This method ensures that the values are stored as arrays
@@ -101,7 +101,7 @@ class Api::V1::ProductsController < ApplicationController
       params[:product][:option_types_attributes].each do |index, option_type|
         if option_type[:value].is_a?(String)
           # Convert the comma-separated string into an array of values
-          option_type[:value] = option_type[:value].split(',')
+          option_type[:value] = option_type[:value]
         end
       end
     end

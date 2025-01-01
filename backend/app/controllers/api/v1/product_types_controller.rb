@@ -4,7 +4,7 @@ class Api::V1::ProductTypesController < ApplicationController
   # GET /product_types or /product_types.json
   def index
     @product_types = ProductType.all
-    render json: @product_types,status :ok
+    render json: @product_types, status: :ok
   end
 
   # GET /product_types/1 or /product_types/1.json

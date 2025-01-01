@@ -76,7 +76,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_31_155812) do
 
   create_table "option_types", force: :cascade do |t|
     t.string "name"
-    t.string "value", default: [], null: false, array: true
+    t.string "values", default: [], null: false, array: true
     t.integer "position"
     t.bigint "product_id", null: false
     t.datetime "created_at", null: false
@@ -100,7 +100,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_31_155812) do
   end
 
   create_table "products", force: :cascade do |t|
-    t.string "name"
+    t.string "title"
     t.string "description"
     t.integer "sub_category_id"
     t.decimal "master_price", precision: 10, scale: 2
@@ -144,6 +144,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_31_155812) do
     t.string "unique_id"
     t.string "barcode"
     t.integer "position"
+    t.integer "quantity"
     t.bigint "product_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

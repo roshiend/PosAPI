@@ -10,6 +10,7 @@ class CreateVariants < ActiveRecord::Migration[8.0]
       t.string :unique_id
       t.string :barcode
       t.integer :position 
+      t.integer :quantity
       t.references :product, null: false, foreign_key: true
       t.timestamps
     end

@@ -2,7 +2,7 @@ class OptionType < ApplicationRecord
     belongs_to :product
 
     validates :position, uniqueness: { scope: :product_id }
-    validates :name, :value, presence: true
+    validates :name, :values, presence: true
     
     before_create :set_initial_position
     before_update :assign_position_on_update

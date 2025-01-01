@@ -4,7 +4,7 @@ class Api::V1::CategoriesController < ApplicationController
   # GET /categories or /categories.json
   def index
     @categories = Category.all
-    render json: @categories,status: :ok
+    render json: @categories, include: { sub_categories: {} }
   end
 
   # GET /categories/1 or /categories/1.json

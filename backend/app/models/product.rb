@@ -10,7 +10,7 @@ class Product < ApplicationRecord
     has_many :sub_categories, through: :category
     
     has_rich_text :description
-    validates :name, :vendor, :shop_location, :listing_type, presence: true
+    validates :title, :vendor, :shop_location, :listing_type, presence: true
     validates :description, presence: true
   
     accepts_nested_attributes_for :option_types, allow_destroy: true
@@ -24,7 +24,7 @@ class Product < ApplicationRecord
   
     def check_option_types
       self.option_types.each do |option_type|
-        if option_type.name.blank? || option_type.value.blank? || option_type.value.all?  {  option_type.marked_for_destruction? }
+        if option_type.name.blank? || option_type.values.blank? || option_type.values.all?  {  option_type.marked_for_destruction? }
           option_type.mark_for_destruction
         end
       end

@@ -15,6 +15,7 @@ export default function VariantsTable({
   onUpdateVariant,
   onDeleteVariant 
 }: VariantsTableProps) {
+  // Check if any options have values
   const hasOptionValues = options.some(option => option.values.length > 0);
 
   if (!hasOptionValues) {
@@ -29,7 +30,7 @@ export default function VariantsTable({
 
   return (
     <div className="bg-white rounded-lg shadow">
-      <div className="px-4 py-5 border-b border-gray-200 sm:px-6 flex justify-between items-center">
+      <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
         <h3 className="text-lg font-medium leading-6 text-gray-900">Variants</h3>
       </div>
 
