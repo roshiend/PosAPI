@@ -7,17 +7,24 @@ export async function createProduct(productData: Product) {
     // Validate the data
     const validatedData = productSchema.parse(productData);
     
-    // Transform the data to match Rails API expectations with indexed attributes
+    // Transform the data to match Rails API expectations
     const payload = {
       product: {
         title: validatedData.title,
         description: validatedData.description,
+        vendor_id: validatedData.vendor_id,
+        product_type_id: validatedData.product_type_id,
+        shop_location_id: validatedData.shop_location_id,
+        category_id: validatedData.category_id,
+        subcategory_id: validatedData.subcategory_id,
+        listing_type_id: validatedData.listing_type_id,
         option_types_attributes: Object.fromEntries(
           validatedData.options.map((opt, index) => [
             index,
             {
               name: opt.name,
-              values: opt.values
+              values: opt.values,
+              position: opt.position
             }
           ])
         ),
@@ -52,6 +59,12 @@ export async function updateProduct(productId: string, productData: Product) {
       product: {
         title: validatedData.title,
         description: validatedData.description,
+        vendor_id: validatedData.vendor_id,
+        product_type_id: validatedData.product_type_id,
+        shop_location_id: validatedData.shop_location_id,
+        category_id: validatedData.category_id,
+        subcategory_id: validatedData.subcategory_id,
+        listing_type_id: validatedData.listing_type_id,
         option_types_attributes: Object.fromEntries(
           validatedData.options.map((opt, index) => [
             index,
@@ -59,6 +72,7 @@ export async function updateProduct(productId: string, productData: Product) {
               id: opt.id,
               name: opt.name,
               values: opt.values,
+              position: opt.position,
               _destroy: opt.values.length === 0
             }
           ])

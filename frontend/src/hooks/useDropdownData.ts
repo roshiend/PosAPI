@@ -8,7 +8,7 @@ import {
   fetchSubcategories,
   fetchListingTypes,
 } from '../services/dropdownService';
-import { toast } from 'react-hot-toast';
+import { showErrorToast } from '../utils/errorHandling';
 
 export function useDropdownData(selectedCategoryId: string = '') {
   const [vendors, setVendors] = useState<SelectOption[]>([]);
@@ -19,13 +19,18 @@ export function useDropdownData(selectedCategoryId: string = '') {
   const [listingTypes, setListingTypes] = useState<SelectOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch all dropdown data except subcategories
   useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
 
-    const loadDropdownData = async () => {
+    const loadData = async () => {
       try {
-        const results = await Promise.allSettled([
+        const [
+          vendorData,
+          productTypeData,
+          locationData,
+          categoryData,
+          listingTypeData
+        ] = await Promise.all([
           fetchVendors(),
           fetchProductTypes(),
           fetchShopLocations(),
@@ -33,39 +38,29 @@ export function useDropdownData(selectedCategoryId: string = '') {
           fetchListingTypes()
         ]);
 
-        if (!isMounted) return;
+        if (!mounted) return;
 
-        // Process results and handle individual failures
-        results.forEach((result, index) => {
-          if (result.status === 'fulfilled') {
-            switch (index) {
-              case 0: setVendors(result.value); break;
-              case 1: setProductTypes(result.value); break;
-              case 2: setShopLocations(result.value); break;
-              case 3: setCategories(result.value); break;
-              case 4: setListingTypes(result.value); break;
-            }
-          } else {
-            toast.error(`Failed to load ${getDropdownName(index)}`);
-          }
-        });
+        setVendors(vendorData);
+        setProductTypes(productTypeData);
+        setShopLocations(locationData);
+        setCategories(categoryData);
+        setListingTypes(listingTypeData);
       } catch (error) {
-        if (!isMounted) return;
-        toast.error('Failed to load dropdown data');
+        if (!mounted) return;
+        showErrorToast('Failed to load form data. Please try again.');
       } finally {
-        if (isMounted) {
+        if (mounted) {
           setIsLoading(false);
         }
       }
     };
 
-    loadDropdownData();
-    return () => { isMounted = false; };
+    loadData();
+    return () => { mounted = false; };
   }, []);
 
-  // Fetch subcategories when category changes
   useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
 
     const loadSubcategories = async () => {
       if (!selectedCategoryId) {
@@ -75,19 +70,19 @@ export function useDropdownData(selectedCategoryId: string = '') {
 
       try {
         const data = await fetchSubcategories(selectedCategoryId);
-        if (isMounted) {
+        if (mounted) {
           setSubcategories(data);
         }
       } catch (error) {
-        if (isMounted) {
+        if (mounted) {
+          showErrorToast('Failed to load subcategories');
           setSubcategories([]);
-          toast.error('Failed to load subcategories');
         }
       }
     };
 
     loadSubcategories();
-    return () => { isMounted = false; };
+    return () => { mounted = false; };
   }, [selectedCategoryId]);
 
   return {
@@ -99,9 +94,4 @@ export function useDropdownData(selectedCategoryId: string = '') {
     listingTypes,
     isLoading
   };
-}
-
-function getDropdownName(index: number): string {
-  const names = ['vendors', 'product types', 'shop locations', 'categories', 'listing types'];
-  return names[index] || 'data';
 }

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Save } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import ProductDetails from './ProductDetails';
 import ProductDropdowns from './ProductDropdowns';
 import OptionsList from '../options/OptionsList';
 import VariantsTable from '../variants/VariantsTable';
-import { Product, ProductVariant } from '../../types/product';
+import { useDropdownData } from '../../hooks/useDropdownData';
+import { Product, ProductOption, ProductVariant } from '../../types/product';
 import { generateVariantCombinations, createVariant, findExistingVariant } from '../../utils/variantUtils';
 import { useProductSubmission } from '../../hooks/useProductSubmission';
-import { useDropdownData } from '../../hooks/useDropdownData';
 
 export default function ProductManager() {
   const [product, setProduct] = useState<Product>({
@@ -26,19 +26,23 @@ export default function ProductManager() {
   const [lastUpdatedVariant, setLastUpdatedVariant] = useState<ProductVariant | null>(null);
   
   const { handleSubmit, isSubmitting } = useProductSubmission();
-  const { 
-    vendors, 
-    productTypes, 
-    shopLocations, 
-    categories, 
-    subcategories, 
-    listingTypes, 
-    isLoading 
-  } = useDropdownData(product.category_id);
+  const dropdownData = useDropdownData(product.category_id);
 
   useEffect(() => {
     updateVariants();
   }, [product.options]);
+
+  const handleTitleChange = (title: string) => {
+    setProduct(prev => ({ ...prev, title }));
+  };
+
+  const handleDescriptionChange = (description: string) => {
+    setProduct(prev => ({ ...prev, description }));
+  };
+
+  const handleDropdownChange = (field: string, value: string) => {
+    setProduct(prev => ({ ...prev, [field]: value }));
+  };
 
   const updateVariants = () => {
     const combinations = generateVariantCombinations(product.options);
@@ -57,21 +61,13 @@ export default function ProductManager() {
     });
   };
 
-  const handleTitleChange = (title: string) => {
-    setProduct(prev => ({ ...prev, title }));
-  };
-
-  const handleDescriptionChange = (description: string) => {
-    setProduct(prev => ({ ...prev, description }));
-  };
-
   const addOption = () => {
     if (product.options.length >= 3) {
-      toast.error('Maximum 3 options allowed');
+      alert('Maximum 3 options allowed');
       return;
     }
 
-    const newOption = {
+    const newOption: ProductOption = {
       id: crypto.randomUUID(),
       name: '',
       values: [],
@@ -96,7 +92,9 @@ export default function ProductManager() {
   const removeOption = (optionId: string) => {
     setProduct(prev => ({
       ...prev,
-      options: prev.options.filter(opt => opt.id !== optionId)
+      options: prev.options
+        .filter(opt => opt.id !== optionId)
+        .map((opt, index) => ({ ...opt, position: index + 1 }))
     }));
   };
 
@@ -129,17 +127,34 @@ export default function ProductManager() {
     });
   };
 
-  const deleteVariant = (variant: ProductVariant) => {
-    setVariants(prevVariants => prevVariants.filter(v => v.id !== variant.id));
-  };
-
-  const handleDropdownChange = (field: string, value: string) => {
+  const handleDeleteVariant = (variant: ProductVariant) => {
+    const optionValues = [variant.option1, variant.option2, variant.option3].filter(Boolean);
+    
     setProduct(prev => ({
       ...prev,
-      [field]: value,
-      // Reset subcategory when category changes
-      ...(field === 'category_id' ? { subcategory_id: '' } : {})
+      options: prev.options.map((opt, index) => {
+        const optionValue = optionValues[index];
+        if (optionValue) {
+          return {
+            ...opt,
+            values: opt.values.filter(v => v !== optionValue)
+          };
+        }
+        return opt;
+      })
     }));
+  };
+
+  const onSubmit = async () => {
+    const productData = {
+      ...product,
+      variants
+    };
+    
+    const success = await handleSubmit(productData);
+    if (success) {
+      // Reset form or redirect as needed
+    }
   };
 
   return (
@@ -154,14 +169,14 @@ export default function ProductManager() {
       />
 
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Product Details</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Product Details</h3>
         <ProductDropdowns
-          vendors={vendors}
-          productTypes={productTypes}
-          shopLocations={shopLocations}
-          categories={categories}
-          subcategories={subcategories}
-          listingTypes={listingTypes}
+          vendors={dropdownData.vendors}
+          productTypes={dropdownData.productTypes}
+          shopLocations={dropdownData.shopLocations}
+          categories={dropdownData.categories}
+          subcategories={dropdownData.subcategories}
+          listingTypes={dropdownData.listingTypes}
           selectedValues={{
             vendor_id: product.vendor_id,
             product_type_id: product.product_type_id,
@@ -171,7 +186,7 @@ export default function ProductManager() {
             listing_type_id: product.listing_type_id
           }}
           onValueChange={handleDropdownChange}
-          isLoading={isLoading}
+          isLoading={dropdownData.isLoading}
         />
       </div>
 
@@ -202,15 +217,16 @@ export default function ProductManager() {
         variants={variants}
         options={product.options}
         onUpdateVariant={updateVariant}
-        onDeleteVariant={deleteVariant}
+        onDeleteVariant={handleDeleteVariant}
       />
 
       <div className="flex justify-end">
         <button
-          onClick={() => handleSubmit(product)}
+          onClick={onSubmit}
           disabled={isSubmitting}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
+          <Save size={16} className="mr-2" />
           {isSubmitting ? 'Saving...' : 'Save Product'}
         </button>
       </div>

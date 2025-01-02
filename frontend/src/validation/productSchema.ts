@@ -20,6 +20,12 @@ const variantSchema = z.object({
 export const productSchema = z.object({
   title: z.string().min(1, 'Product title is required'),
   description: z.string(),
+  vendor_id: z.string().min(1, 'Vendor is required'),
+  product_type_id: z.string().min(1, 'Product type is required'),
+  shop_location_id: z.string().min(1, 'Shop location is required'),
+  category_id: z.string().min(1, 'Category is required'),
+  subcategory_id: z.string().min(1, 'Subcategory is required'),
+  listing_type_id: z.string().min(1, 'Listing type is required'),
   options: z.array(optionSchema),
   variants: z.array(variantSchema)
 });
