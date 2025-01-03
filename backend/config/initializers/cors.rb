@@ -8,7 +8,7 @@
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
     #origins "https://vocal-daifuku-43573c.netlify.app"
-    origins "localhost:5173"
+    origins "localhost:5173", "https://vocal-daifuku-43573c.netlify.app"
     resource "*",
       headers: :any,
       methods: [:get, :post, :put, :patch, :delete, :options, :head]
